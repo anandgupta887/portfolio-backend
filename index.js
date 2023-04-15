@@ -103,7 +103,12 @@ app.post("/profiles", verifyToken, async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const profile = {
+    let resume = await Resume.findOne({ userId: user._id });
+    if (!resume) {
+      resume = new Resume({ userId: user._id });
+    }
+
+    resume.profile = {
       name,
       title,
       linkedIn,
@@ -111,50 +116,114 @@ app.post("/profiles", verifyToken, async (req, res) => {
       email,
       phone,
       image,
-      userId: user._id,
     };
 
-    const resume = user.resume || new Resume({ userId: user._id });
-    resume.profile = profile;
-
     await resume.save();
-
-    return res.status(201).json({ message: "Profile created", profile });
+    return res
+      .status(201)
+      .json({ message: "Profile created", profile: resume.profile });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Server error" });
   }
 });
 
-//profiledata
+//skills
 app.post("/skills", verifyToken, async (req, res) => {
-  const { name, title, linkedIn, github, email, phone, image } = req.body;
+  const { skills } = req.body;
   const userEmail = req.user;
 
   try {
     const user = await UserAuth.findOne({ email: userEmail });
-    console.log(user);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const profile = {
-      name,
-      title,
-      linkedIn,
-      github,
-      email,
-      phone,
-      image,
-      userId: user._id,
-    };
+    let resume = await Resume.findOne({ userId: user._id });
+    if (!resume) {
+      resume = new Resume({ userId: user._id });
+    }
 
-    const resume = user.resume || new Resume({ userId: user._id });
-    resume.profile = profile;
+    resume.skills = skills;
 
     await resume.save();
+    return res.status(201).json({ message: "Skills added", skills });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
 
-    return res.status(201).json({ message: "Profile created", profile });
+//experience
+app.post("/experience", verifyToken, async (req, res) => {
+  const { experience } = req.body;
+  const userEmail = req.user;
+
+  try {
+    const user = await UserAuth.findOne({ email: userEmail });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    let resume = await Resume.findOne({ userId: user._id });
+    if (!resume) {
+      resume = new Resume({ userId: user._id });
+    }
+
+    resume.experience = experience;
+
+    await resume.save();
+    return res.status(201).json({ message: "Experience added", experience });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
+//projects
+app.post("/projects", verifyToken, async (req, res) => {
+  const { projects } = req.body;
+  const userEmail = req.user;
+
+  try {
+    const user = await UserAuth.findOne({ email: userEmail });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    let resume = await Resume.findOne({ userId: user._id });
+    if (!resume) {
+      resume = new Resume({ userId: user._id });
+    }
+
+    resume.projects = projects;
+
+    await resume.save();
+    return res.status(201).json({ message: "Projects added", projects });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
+//getprofile
+app.get("/profiles/:username", async (req, res) => {
+  const username = req.params.username;
+
+  try {
+    const user = await UserAuth.findOne({ username: username });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const resume = await Resume.findOne({ userId: user._id });
+    if (!resume) {
+      return res.status(404).json({ message: "Profile not found" });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Resume retrieved", profile: resume });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Server error" });

@@ -17,11 +17,19 @@ const educationSchema = new mongoose.Schema({
   endDate: { type: Date },
 });
 
+const experienceSchema = new mongoose.Schema({
+  company: { type: String, required: true },
+  position: { type: String, required: true },
+  from: { type: Date },
+  to: { type: Date },
+  description: { type: String },
+});
+
 const projectSchema = new mongoose.Schema({
   name: { type: String, required: true },
   description: { type: String },
   link: { type: String },
-  startDate: { type: Date, required: true },
+  startDate: { type: Date },
   endDate: { type: Date },
 });
 
@@ -35,7 +43,8 @@ const resumeSchema = new mongoose.Schema({
   education: { type: [educationSchema] },
   projects: { type: [projectSchema] },
   skills: { type: [skillSchema] },
-  profile: { type: [profileSchema] },
+  profile: { type: profileSchema },
+  experience: { type: [experienceSchema] },
 });
 
 const userAuthSchema = new mongoose.Schema({
