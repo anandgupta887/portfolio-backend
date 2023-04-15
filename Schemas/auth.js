@@ -1,5 +1,14 @@
 const mongoose = require("mongoose");
 
+const profileSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  title: { type: String },
+  linkedIn: { type: String },
+  github: { type: String },
+  email: { type: String, required: true },
+  phone: { type: String, required: true },
+});
+
 const educationSchema = new mongoose.Schema({
   institution: { type: String, required: true },
   degree: { type: String, required: true },
@@ -18,7 +27,7 @@ const projectSchema = new mongoose.Schema({
 
 const skillSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  level: { type: Number, required: true },
+  level: { type: Number },
 });
 
 const resumeSchema = new mongoose.Schema({
@@ -26,6 +35,7 @@ const resumeSchema = new mongoose.Schema({
   education: { type: [educationSchema] },
   projects: { type: [projectSchema] },
   skills: { type: [skillSchema] },
+  profile: { type: [profileSchema] },
 });
 
 const userAuthSchema = new mongoose.Schema({
@@ -38,5 +48,5 @@ const userAuthSchema = new mongoose.Schema({
 
 module.exports = {
   UserAuth: mongoose.model("users", userAuthSchema),
-  Resume: mongoose.model("Resume", resumeSchema),
+  Resume: mongoose.model("resume", resumeSchema),
 };
