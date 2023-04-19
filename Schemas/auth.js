@@ -12,9 +12,9 @@ const profileSchema = new mongoose.Schema({
 const educationSchema = new mongoose.Schema({
   institution: { type: String, required: true },
   degree: { type: String, required: true },
-  fieldOfStudy: { type: String, required: true },
-  startDate: { type: Date, required: true },
-  endDate: { type: Date },
+  fieldOfStudy: { type: String,},
+  from: { type: Date, required: true },
+  to: { type: Date },
 });
 
 const experienceSchema = new mongoose.Schema({

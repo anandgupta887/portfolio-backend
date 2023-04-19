@@ -5,18 +5,20 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { UserAuth, Resume } = require("./Schemas/auth");
 require("dotenv").config();
+const multer = require("multer");
+const path = require("path");
 
 const app = express();
 app.use(bodyParser.json());
 
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "OPTIONS, GET, POST, PUT, PATCH, DELETE"
-  );
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  next();
+//setup multer storage engine
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "public/images"); // Save uploaded images to public/images folder
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname)); // Add a timestamp to the filename to make it unique
+  },
 });
 
 // MongoDB connection
@@ -30,6 +32,7 @@ db.once("open", () => {
   console.log("MongoDB connection successful.");
 });
 
+// Authentication
 const verifyToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
@@ -40,6 +43,38 @@ const verifyToken = (req, res, next) => {
     next();
   });
 };
+
+// Set up multer upload middleware
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 1000000, // Set a file size limit of 1MB
+  },
+  fileFilter: (req, file, cb) => {
+    const filetypes = /jpeg|jpg|png/; // Accept only jpeg, jpg, and png files
+    const extname = filetypes.test(
+      path.extname(file.originalname).toLowerCase()
+    );
+    const mimetype = filetypes.test(file.mimetype);
+
+    if (mimetype && extname) {
+      return cb(null, true);
+    } else {
+      return cb(new Error("Invalid file type"));
+    }
+  },
+});
+
+// CORS fixes
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "OPTIONS, GET, POST, PUT, PATCH, DELETE"
+  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  next();
+});
 
 //signup
 app.post("/auth/signup", async (req, res) => {
@@ -82,9 +117,27 @@ app.post("/auth/login", async (req, res) => {
       return res.status(400).json({ error: "Invalid credentials." });
     }
     const token = jwt.sign({ email: user.email }, "secret_key");
-    res
-      .status(200)
-      .json({ name: user?.name, message: "Login successful.", token });
+    res.status(200).json({
+      user: user,
+      token: token,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: err });
+  }
+});
+
+app.post("/auth/update-password", async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const existingUser = await UserAuth.findOne({ email: email });
+    if (!existingUser) {
+      return res.status(400).json({ error: "Email doesn't exists." });
+    }
+    const hashedPassword = await bcrypt.hash(password, 12);
+    existingUser.password = hashedPassword;
+    await existingUser.save();
+    res.status(201).json({ message: "Password changed successfully!" });
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: err });
@@ -119,6 +172,8 @@ app.post("/profiles", verifyToken, async (req, res) => {
     };
 
     await resume.save();
+    user.resume = resume;
+    await user.save();
     return res
       .status(201)
       .json({ message: "Profile created", profile: resume.profile });
@@ -180,6 +235,32 @@ app.post("/experience", verifyToken, async (req, res) => {
   }
 });
 
+//experience
+app.post("/education", verifyToken, async (req, res) => {
+  const { education } = req.body;
+  const userEmail = req.user;
+
+  try {
+    const user = await UserAuth.findOne({ email: userEmail });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    let resume = await Resume.findOne({ userId: user._id });
+    if (!resume) {
+      resume = new Resume({ userId: user._id });
+    }
+
+    resume.education = education;
+
+    await resume.save();
+    return res.status(201).json({ message: "Education added", education });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
 //projects
 app.post("/projects", verifyToken, async (req, res) => {
   const { projects } = req.body;
@@ -230,7 +311,24 @@ app.get("/profiles/:username", async (req, res) => {
   }
 });
 
-// Start server
+// Set up API endpoint for uploading image
+app.post("/upload", upload.single("image"), async (req, res) => {
+  try {
+    const file = req.body;
+    console.log(file);
+
+    if (!file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    return res.status(200).json({ filename: file.filename });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
+//Start server
 const port = process.env.PORT || 4000;
 app.listen(port, () => {
   console.log(`Server listening on port ${port}.`);
