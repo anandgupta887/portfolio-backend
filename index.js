@@ -118,7 +118,7 @@ app.post("/auth/login", async (req, res) => {
     }
     const token = jwt.sign({ email: user.email }, "secret_key");
     res.status(200).json({
-      user: user,
+      user: user.resume,
       token: token,
     });
   } catch (err) {
@@ -141,6 +141,26 @@ app.post("/auth/update-password", async (req, res) => {
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: err });
+  }
+});
+
+//login
+app.get("/get-profile", verifyToken, async (req, res) => {
+  const userEmail = req.user;
+
+  try {
+    const user = await UserAuth.findOne({ email: userEmail });
+    console.log(user);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    let resume = await Resume.findOne({ userId: user._id });
+
+    return res.status(201).json({ message: "Profile created", resume });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
   }
 });
 
