@@ -118,7 +118,7 @@ app.post("/auth/login", async (req, res) => {
     }
     const token = jwt.sign({ email: user.email }, "secret_key");
     res.status(200).json({
-      user: user,
+      user: user.resume,
       token: token,
     });
   } catch (err) {
@@ -144,7 +144,8 @@ app.post("/auth/update-password", async (req, res) => {
   }
 });
 
-app.get("/getData", verifyToken, async (req, res) => {
+//login
+app.get("/get-profile", verifyToken, async (req, res) => {
   const userEmail = req.user;
 
   try {
@@ -155,9 +156,8 @@ app.get("/getData", verifyToken, async (req, res) => {
     }
 
     let resume = await Resume.findOne({ userId: user._id });
-    return res
-      .status(201)
-      .json({ message: "Profile fetched", details: resume });
+
+    return res.status(201).json({ message: "Profile created", resume });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Server error" });
