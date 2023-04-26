@@ -144,6 +144,26 @@ app.post("/auth/update-password", async (req, res) => {
   }
 });
 
+app.get("/getData", verifyToken, async (req, res) => {
+  const userEmail = req.user;
+
+  try {
+    const user = await UserAuth.findOne({ email: userEmail });
+    console.log(user);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    let resume = await Resume.findOne({ userId: user._id });
+    return res
+      .status(201)
+      .json({ message: "Profile fetched", details: resume });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
 //profiledata
 app.post("/profiles", verifyToken, async (req, res) => {
   const { name, title, linkedIn, github, email, phone, image } = req.body;
