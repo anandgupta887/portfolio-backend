@@ -166,7 +166,17 @@ app.get("/get-profile", verifyToken, async (req, res) => {
 
 //profiledata
 app.post("/profiles", verifyToken, async (req, res) => {
-  const { name, title, linkedIn, github, email, phone, image } = req.body;
+  const {
+    name,
+    title,
+    linkedIn,
+    github,
+    location,
+    email,
+    phone,
+    about,
+    image,
+  } = req.body;
   const userEmail = req.user;
 
   try {
@@ -189,6 +199,8 @@ app.post("/profiles", verifyToken, async (req, res) => {
       email,
       phone,
       image,
+      about,
+      location,
     };
 
     await resume.save();
