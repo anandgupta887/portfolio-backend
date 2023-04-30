@@ -8,8 +8,16 @@ require("dotenv").config();
 const multer = require("multer");
 const path = require("path");
 
+const cors = require("cors");
+
 const app = express();
 app.use(bodyParser.json());
+
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+  })
+);
 
 //setup multer storage engine
 const storage = multer.diskStorage({
@@ -323,7 +331,7 @@ app.post("/projects", verifyToken, async (req, res) => {
 app.get("/profiles/:username", async (req, res) => {
   const username = req.params.username;
 
-  console.log(username)
+  console.log(username);
 
   try {
     const user = await UserAuth.findOne({ username: username });
@@ -336,9 +344,7 @@ app.get("/profiles/:username", async (req, res) => {
       return res.status(404).json({ message: "Profile not found" });
     }
 
-    return res
-      .status(200)
-      .json({ message: "Resume retrieved", data: resume });
+    return res.status(200).json({ message: "Resume retrieved", data: resume });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Server error" });
@@ -346,13 +352,13 @@ app.get("/profiles/:username", async (req, res) => {
 });
 
 //getListOfUsers
-app.get('/users', async (req, res) => {
+app.get("/users", async (req, res) => {
   try {
     const users = await UserAuth.find();
-    return res.status(200).json({ message: 'Users retrieved', data: users });
+    return res.status(200).json({ message: "Users retrieved", data: users });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'Server error' });
+    return res.status(500).json({ message: "Server error" });
   }
 });
 
