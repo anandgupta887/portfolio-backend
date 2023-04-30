@@ -7,27 +7,29 @@ const profileSchema = new mongoose.Schema({
   github: { type: String },
   email: { type: String, required: true },
   phone: { type: String, required: true },
+  about: { type: String },
+  location: { type: String, required: true },
 });
 
 const educationSchema = new mongoose.Schema({
   institution: { type: String, required: true },
   degree: { type: String, required: true },
-  fieldOfStudy: { type: String,},
+  fieldOfStudy: { type: String },
   from: { type: Date, required: true },
   to: { type: Date },
 });
 
 const experienceSchema = new mongoose.Schema({
   company: { type: String, required: true },
-  position: { type: String, required: true },
-  from: { type: Date },
-  to: { type: Date },
+  title: { type: String, required: true },
+  startDate: { type: Date },
+  endDate: { type: Date },
   description: { type: String },
 });
 
 const projectSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  description: { type: String },
+  title: { type: String, required: true },
+  projectDescription: { type: String },
   link: { type: String },
   startDate: { type: Date },
   endDate: { type: Date },

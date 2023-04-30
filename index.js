@@ -166,7 +166,17 @@ app.get("/get-profile", verifyToken, async (req, res) => {
 
 //profiledata
 app.post("/profiles", verifyToken, async (req, res) => {
-  const { name, title, linkedIn, github, email, phone, image } = req.body;
+  const {
+    name,
+    title,
+    linkedIn,
+    github,
+    location,
+    email,
+    phone,
+    about,
+    image,
+  } = req.body;
   const userEmail = req.user;
 
   try {
@@ -189,6 +199,8 @@ app.post("/profiles", verifyToken, async (req, res) => {
       email,
       phone,
       image,
+      about,
+      location,
     };
 
     await resume.save();
@@ -311,6 +323,8 @@ app.post("/projects", verifyToken, async (req, res) => {
 app.get("/profiles/:username", async (req, res) => {
   const username = req.params.username;
 
+  console.log(username)
+
   try {
     const user = await UserAuth.findOne({ username: username });
     if (!user) {
@@ -324,10 +338,21 @@ app.get("/profiles/:username", async (req, res) => {
 
     return res
       .status(200)
-      .json({ message: "Resume retrieved", profile: resume });
+      .json({ message: "Resume retrieved", data: resume });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Server error" });
+  }
+});
+
+//getListOfUsers
+app.get('/users', async (req, res) => {
+  try {
+    const users = await UserAuth.find();
+    return res.status(200).json({ message: 'Users retrieved', data: users });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Server error' });
   }
 });
 
