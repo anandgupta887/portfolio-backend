@@ -8,8 +8,12 @@ require("dotenv").config();
 const multer = require("multer");
 const path = require("path");
 
+const cors = require("cors");
+
 const app = express();
 app.use(bodyParser.json());
+
+app.use(cors());
 
 //setup multer storage engine
 const storage = multer.diskStorage({
@@ -89,20 +93,28 @@ app.post("/auth/signup", async (req, res) => {
       return res.status(400).json({ error: "Email already exists." });
     }
     const hashedPassword = await bcrypt.hash(password, 12);
+    const newResume = new Resume({
+      userId: new mongoose.Types.ObjectId(),
+    });
+    const savedResume = await newResume.save();
     const newUser = new UserAuth({
       name,
       email,
       password: hashedPassword,
       username,
+      resume: { userId: savedResume._id },
     });
     const savedUser = await newUser.save();
     const token = jwt.sign({ email: savedUser.email }, "secret_key");
-    res.status(201).json({ message: "User created successfully!", token });
+    res
+      .status(201)
+      .json({ message: "User created successfully!", token: token });
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: err });
   }
 });
+
 
 //login
 app.post("/auth/login", async (req, res) => {
@@ -323,7 +335,7 @@ app.post("/projects", verifyToken, async (req, res) => {
 app.get("/profiles/:username", async (req, res) => {
   const username = req.params.username;
 
-  console.log(username)
+  console.log(username);
 
   try {
     const user = await UserAuth.findOne({ username: username });
@@ -336,9 +348,7 @@ app.get("/profiles/:username", async (req, res) => {
       return res.status(404).json({ message: "Profile not found" });
     }
 
-    return res
-      .status(200)
-      .json({ message: "Resume retrieved", data: resume });
+    return res.status(200).json({ message: "Resume retrieved", data: resume });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Server error" });
@@ -346,13 +356,13 @@ app.get("/profiles/:username", async (req, res) => {
 });
 
 //getListOfUsers
-app.get('/users', async (req, res) => {
+app.get("/users", async (req, res) => {
   try {
     const users = await UserAuth.find();
-    return res.status(200).json({ message: 'Users retrieved', data: users });
+    return res.status(200).json({ message: "Users retrieved", data: users });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'Server error' });
+    return res.status(500).json({ message: "Server error" });
   }
 });
 
