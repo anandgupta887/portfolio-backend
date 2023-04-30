@@ -13,11 +13,7 @@ const cors = require("cors");
 const app = express();
 app.use(bodyParser.json());
 
-app.use(
-  cors({
-    origin: "http://localhost:3000",
-  })
-);
+app.use(cors());
 
 //setup multer storage engine
 const storage = multer.diskStorage({
