@@ -93,20 +93,28 @@ app.post("/auth/signup", async (req, res) => {
       return res.status(400).json({ error: "Email already exists." });
     }
     const hashedPassword = await bcrypt.hash(password, 12);
+    const newResume = new Resume({
+      userId: new mongoose.Types.ObjectId(),
+    });
+    const savedResume = await newResume.save();
     const newUser = new UserAuth({
       name,
       email,
       password: hashedPassword,
       username,
+      resume: { userId: savedResume._id },
     });
     const savedUser = await newUser.save();
     const token = jwt.sign({ email: savedUser.email }, "secret_key");
-    res.status(201).json({ message: "User created successfully!", token });
+    res
+      .status(201)
+      .json({ message: "User created successfully!", token: token });
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: err });
   }
 });
+
 
 //login
 app.post("/auth/login", async (req, res) => {
