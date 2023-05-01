@@ -9,6 +9,7 @@ const profileSchema = new mongoose.Schema({
   phone: { type: String, required: true },
   about: { type: String },
   location: { type: String, required: true },
+  image: { type: String },
 });
 
 const educationSchema = new mongoose.Schema({
@@ -22,6 +23,7 @@ const educationSchema = new mongoose.Schema({
 const experienceSchema = new mongoose.Schema({
   company: { type: String, required: true },
   title: { type: String, required: true },
+  location: { type: String, required: true },
   startDate: { type: Date },
   endDate: { type: Date },
   description: { type: String },
