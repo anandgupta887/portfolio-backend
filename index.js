@@ -365,6 +365,33 @@ app.get("/users", async (req, res) => {
   }
 });
 
+app.post("/template", verifyToken, async (req, res) => {
+  const { templateId } = req.body;
+  const userEmail = req.user;
+
+  console.log('i m in')
+
+  try {
+    const user = await UserAuth.findOne({ email: userEmail });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    let resume = await Resume.findOne({ userId: user._id });
+    if (!resume) {
+      resume = new Resume({ userId: user._id });
+    }
+
+    resume.template = { templateId: templateId };
+
+    await resume.save();
+    return res.status(201).json({ message: "Template Id added", resume });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
 // Set up API endpoint for uploading image
 app.post("/upload", upload.single("image"), async (req, res) => {
   try {

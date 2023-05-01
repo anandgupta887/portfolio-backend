@@ -43,6 +43,10 @@ const skillSchema = new mongoose.Schema({
   level: { type: Number },
 });
 
+const templateSchema = new mongoose.Schema({
+  templateId: { type: Number, required: true },
+});
+
 const resumeSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, required: true },
   education: { type: [educationSchema] },
@@ -50,6 +54,7 @@ const resumeSchema = new mongoose.Schema({
   skills: { type: [skillSchema] },
   profile: { type: profileSchema },
   experience: { type: [experienceSchema] },
+  template: { type: templateSchema },
 });
 
 const userAuthSchema = new mongoose.Schema({
