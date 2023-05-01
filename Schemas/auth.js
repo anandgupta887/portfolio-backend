@@ -35,6 +35,7 @@ const projectSchema = new mongoose.Schema({
   link: { type: String },
   startDate: { type: Date },
   endDate: { type: Date },
+  image: { type: String },
 });
 
 const skillSchema = new mongoose.Schema({
